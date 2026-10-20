@@ -1,0 +1,82 @@
+<!doctype html>
+<!--
+    index.html — the page layout only. All behaviour is in app.js, all styling in styles.css.
+    Served automatically by the C# server for "/" (UseDefaultFiles + UseStaticFiles in Program.cs).
+    The id="..." attributes are how app.js finds each element.
+-->
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <!-- Makes the layout fit phone screens instead of showing a zoomed-out desktop view. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AI Orchestrator</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- marked: converts the model's Markdown replies to HTML. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+    <!-- DOMPurify: removes anything dangerous (like <script>) from that HTML before it's shown. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+</head>
+<body>
+<div class="app">
+    <!-- Left sidebar: chat history and settings. -->
+    <aside class="sidebar" id="sidebar">
+        <button class="new-chat" id="newChat">+ New chat</button>
+        <!-- Filled in by renderChatList() in app.js. -->
+        <ul class="chat-list" id="chatList"></ul>
+        <div class="sidebar-footer">
+            <label class="field">
+                <span>Model</span>
+                <!-- Options are added by loadModels() from GET /api/models. -->
+                <select id="modelSelect"></select>
+            </label>
+            <label class="toggle">
+                <!-- Sent as "think" in the /api/chat request. Off = qwen3 answers directly, much faster. -->
+                <input type="checkbox" id="thinkToggle" checked>
+                <span>Thinking mode (slower, smarter)</span>
+            </label>
+            <label class="toggle">
+                <!-- Sent as "useTools". On = the model may list folders and read files. -->
+                <input type="checkbox" id="toolsToggle" checked>
+                <span>File access</span>
+            </label>
+            <label class="toggle" id="writeToggleLabel">
+                <!-- Sent as "allowWrite". On = the model may also create and edit files (backups are kept). -->
+                <input type="checkbox" id="writeToggle" checked>
+                <span>Allow writing files</span>
+            </label>
+            <!-- Filled by loadModels() with the allowed folders from GET /api/config. -->
+            <small class="hint" id="folderHint"></small>
+        </div>
+    </aside>
+
+    <!-- Main area: title bar, messages, input box. -->
+    <main class="main">
+        <header class="topbar">
+            <button class="icon-btn" id="sidebarToggle" aria-label="Toggle sidebar">☰</button>
+            <h1 id="chatTitle">New chat</h1>
+            <!-- Short status text: "Thinking…", "Generating…", or connection warnings. -->
+            <span class="status" id="status"></span>
+        </header>
+
+        <!-- Message bubbles are added here by createMessageView() in app.js. -->
+        <section class="messages" id="messages">
+            <!-- Placeholder shown while a chat has no messages. -->
+            <div class="empty" id="emptyState">
+                <h2>Chat with your local model</h2>
+                <p>Messages go through the C# server to Ollama on this machine.</p>
+            </div>
+        </section>
+
+        <!-- Input box. Submitting the form (Send button or Enter) calls send() in app.js. -->
+        <form class="composer" id="composer">
+            <textarea id="input" rows="1" placeholder="Send a message… (Enter to send, Shift+Enter for newline)"></textarea>
+            <button type="submit" id="sendBtn">Send</button>
+            <!-- Shown instead of Send while a reply is generating. -->
+            <button type="button" id="stopBtn" class="stop" hidden>Stop</button>
+        </form>
+    </main>
+</div>
+<!-- Loaded last, so every element above already exists when the script runs. -->
+<script src="app.js"></script>
+</body>
+</html>
